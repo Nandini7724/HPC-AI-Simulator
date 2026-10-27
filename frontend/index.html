@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HPC-AI Simulator</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="js/vendor/chart.umd.js"></script>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ============ SIDEBAR NAV ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">HPC</div>
+      <div class="brand-text">
+        <div class="brand-title">HPC-AI Simulator</div>
+        <div class="brand-sub">Performance Analysis Toolkit</div>
+      </div>
+    </div>
+
+    <nav class="nav-list">
+      <button class="nav-item active" data-page="workload">
+        <span class="nav-icon">&#9881;</span> Workload
+      </button>
+      <button class="nav-item" data-page="architecture">
+        <span class="nav-icon">&#9673;</span> Architecture
+      </button>
+      <button class="nav-item" data-page="simulation">
+        <span class="nav-icon">&#9654;</span> Simulation
+      </button>
+      <button class="nav-item" data-page="results">
+        <span class="nav-icon">&#128202;</span> Results
+      </button>
+      <button class="nav-item" data-page="experiments">
+        <span class="nav-icon">&#129514;</span> Experiments
+      </button>
+      <button class="nav-item" data-page="about">
+        <span class="nav-icon">&#8505;</span> About
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button id="theme-toggle" class="theme-toggle">Toggle Light / Dark</button>
+      <div class="footer-note">Educational simulation.<br>Not real hardware benchmarking.</div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN CONTENT ============ -->
+  <main class="main-content">
+
+    <!-- ---------- PAGE: WORKLOAD ---------- -->
+    <section id="page-workload" class="page active">
+      <header class="page-header">
+        <h1>Workload Configuration</h1>
+      </header>
+
+      <div class="preset-bar">
+        <span class="preset-label">Scenario presets:</span>
+        <button class="chip" data-preset="small">Small CNN</button>
+        <button class="chip" data-preset="medium">Medium AI</button>
+        <button class="chip" data-preset="large">Large AI</button>
+        <button class="chip" data-preset="distributed">Distributed AI</button>
+      </div>
+
+      <form id="config-form" class="config-grid">
+
+        <div class="card form-card">
+          <h2>AI Workload</h2>
+
+          <label>Model Type
+            <select id="model-type">
+              <option value="small_cnn">Small CNN (10M params)</option>
+              <option value="medium_cnn">Medium CNN (100M params)</option>
+              <option value="large_cnn">Large CNN (1B params)</option>
+              <option value="transformer">Transformer (10B params)</option>
+              <option value="large_transformer">Large Transformer (50B params)</option>
+              <option value="custom">Custom Model</option>
+            </select>
+          </label>
+
+          <label>Model Parameters
+            <input type="number" id="model_parameters" min="1000" value="100000000" step="1000" required>
+            <span class="hint">Total trainable parameters</span>
+          </label>
+
+          <label>Dataset Size (GB)
+            <input type="number" id="dataset_size_gb" min="0.001" value="10" step="0.1" required>
+          </label>
+
+          <label>Batch Size
+            <select id="batch_size">
+              <option value="16">16</option>
+              <option value="32">32</option>
+              <option value="64" selected>64</option>
+              <option value="128">128</option>
+              <option value="256">256</option>
+              <option value="512">512</option>
+            </select>
+          </label>
+
+          <label>Epochs
+            <input type="number" id="epochs" min="1" value="20" step="1" required>
+          </label>
+        </div>
+
+        <div class="card form-card">
+          <h2>Hardware Configuration</h2>
+
+          <label>CPU Cores
+            <select id="cpu_cores">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="4">4</option>
+              <option value="8" selected>8</option>
+              <option value="16">16</option>
+              <option value="32">32</option>
+              <option value="64">64</option>
+            </select>
+          </label>
+
+          <label>GPUs
+            <select id="gpus">
+              <option value="0">0</option>
+              <option value="1">1</option>
+              <option value="2" selected>2</option>
+              <option value="4">4</option>
+              <option value="8">8</option>
+            </select>
+          </label>
+
+          <label>GPU Type
+            <select id="gpu_type">
+              <option value="none">None</option>
+              <option value="generic">Generic GPU (10 TFLOPS)</option>
+              <option value="highend" selected>High-End GPU (15 TFLOPS)</option>
+              <option value="accelerator">AI Accelerator (40 TFLOPS)</option>
+            </select>
+          </label>
+
+          <label>GPU Compute Capacity (TFLOPS)
+            <input type="number" id="gpu_tflops" min="0.01" value="15" step="0.5">
+            <span class="hint">Abstract performance value, not tied to a specific real GPU</span>
+          </label>
+
+          <label>Parallelization Strategy
+            <select id="parallelization">
+              <option value="sequential">Sequential</option>
+              <option value="cpu_multicore">CPU Multicore</option>
+              <option value="data_parallel" selected>Data Parallelism</option>
+              <option value="model_parallel">Model Parallelism</option>
+              <option value="hybrid_parallel">Hybrid Parallelism</option>
+              <option value="distributed">Distributed Processing</option>
+            </select>
+          </label>
+
+          <label class="checkbox-row">
+            <input type="checkbox" id="simd_enabled">
+            Enable SIMD / Vector Processing
+          </label>
+        </div>
+
+        <div class="card form-card">
+          <h2>System Parameters <span class="badge">Advanced</span></h2>
+
+          <label>RAM Capacity (GB)
+            <input type="number" id="ram_gb" min="0.1" value="64" step="1">
+          </label>
+
+          <label>GPU Memory per Device (GB)
+            <input type="number" id="gpu_memory_gb" min="0.1" value="16" step="1">
+          </label>
+
+          <label>Network Bandwidth (Gbps)
+            <input type="number" id="network_bandwidth_gbps" min="0.001" value="100" step="1">
+          </label>
+
+          <label>Communication Latency (ms)
+            <input type="number" id="latency_ms" min="0" value="0.5" step="0.1">
+          </label>
+
+          <label>Parallelizable Fraction (P)
+            <input type="range" id="parallel_fraction" min="0" max="1" value="0.9" step="0.01">
+            <span class="hint" id="parallel_fraction_display">P = 0.90 (90% parallelizable)</span>
+          </label>
+
+          <label>Average Sample Size (MB)
+            <input type="number" id="avg_sample_size_mb" min="0.0001" value="1" step="0.1">
+          </label>
+        </div>
+
+      </form>
+
+      <div class="run-bar">
+        <button id="run-simulation-btn" class="run-btn">&#9654; RUN SIMULATION</button>
+        <div id="form-error" class="form-error"></div>
+      </div>
+    </section>
+
+    <!-- ---------- PAGE: ARCHITECTURE ---------- -->
+    <section id="page-architecture" class="page">
+      <header class="page-header">
+        <h1>Architecture Visualization</h1>
+      </header>
+
+      <div class="card">
+        <div id="architecture-diagram" class="architecture-diagram"></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h2>SIMD / Vector Processing</h2>
+          <p class="muted">When enabled, vectorized instructions process multiple data elements in a single operation instead of one at a time.</p>
+          <div id="simd-demo" class="simd-demo"></div>
+        </div>
+        <div class="card">
+          <h2>Memory Hierarchy</h2>
+          <p class="muted">Closer to the processor: faster and smaller. Farther away: slower and larger.</p>
+          <div id="memory-hierarchy" class="memory-hierarchy"></div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h2>Data Parallelism</h2>
+          <p class="muted">The dataset is split across devices; every device holds a full copy of the model.</p>
+          <div id="data-parallel-demo" class="parallel-demo"></div>
+        </div>
+        <div class="card">
+          <h2>Model Parallelism</h2>
+          <p class="muted">Different layers of the model are placed on different devices.</p>
+          <div id="model-parallel-demo" class="parallel-demo"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- PAGE: SIMULATION ---------- -->
+    <section id="page-simulation" class="page">
+      <header class="page-header">
+        <h1>Simulation Run</h1>
+      </header>
+
+      <div class="card">
+        <div id="sim-animation" class="sim-animation"></div>
+      </div>
+
+      <div class="card" id="sim-log-card" style="display:none;">
+        <h2>Pipeline Trace</h2>
+        <div id="sim-log" class="sim-log"></div>
+      </div>
+    </section>
+
+    <!-- ---------- PAGE: RESULTS ---------- -->
+    <section id="page-results" class="page">
+      <header class="page-header">
+        <h1>Results Dashboard</h1>
+      </header>
+
+      <div id="no-results" class="empty-state">
+        Run a simulation from the <strong>Workload</strong> page to see results here.
+      </div>
+
+      <div id="results-content" style="display:none;">
+
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">Execution Time <button class="help-btn" data-help="exec_time">?</button></div>
+            <div class="kpi-value" id="kpi-exec-time">-</div>
+            <div class="kpi-sub">seconds (estimated)</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Speedup <button class="help-btn" data-help="speedup">?</button></div>
+            <div class="kpi-value" id="kpi-speedup">-</div>
+            <div class="kpi-sub">vs. single-core baseline</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Parallel Efficiency <button class="help-btn" data-help="efficiency">?</button></div>
+            <div class="kpi-value" id="kpi-efficiency">-</div>
+            <div class="kpi-sub">speedup / processing units</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Throughput <button class="help-btn" data-help="throughput">?</button></div>
+            <div class="kpi-value" id="kpi-throughput">-</div>
+            <div class="kpi-sub">samples / sec</div>
+          </div>
+        </div>
+
+        <div class="kpi-grid kpi-grid-secondary">
+          <div class="kpi-card small">
+            <div class="kpi-label">CPU Utilization</div>
+            <div class="kpi-value" id="kpi-cpu-util">-</div>
+          </div>
+          <div class="kpi-card small">
+            <div class="kpi-label">GPU Utilization</div>
+            <div class="kpi-value" id="kpi-gpu-util">-</div>
+          </div>
+          <div class="kpi-card small">
+            <div class="kpi-label">Memory Utilization</div>
+            <div class="kpi-value" id="kpi-mem-util">-</div>
+          </div>
+          <div class="kpi-card small">
+            <div class="kpi-label">Communication Overhead <button class="help-btn" data-help="comm">?</button></div>
+            <div class="kpi-value" id="kpi-comm">-</div>
+          </div>
+          <div class="kpi-card small">
+            <div class="kpi-label">Energy Index</div>
+            <div class="kpi-value" id="kpi-energy">-</div>
+          </div>
+        </div>
+
+        <div class="card" id="memory-warning-card" style="display:none;">
+          <div class="warning-box">
+            &#9888; Estimated working set (<span id="mem-required">-</span> GB) exceeds available memory
+            (<span id="mem-available">-</span> GB). A memory penalty has been applied to execution time,
+            representing paging / offloading overhead.
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Parallelization Plan</h2>
+          <p id="plan-description" class="muted"></p>
+          <div class="plan-grid" id="plan-grid"></div>
+        </div>
+
+        <h2 class="section-title">Performance Graphs</h2>
+        <div class="grid-2">
+          <div class="card chart-card">
+            <h3>Execution Time Comparison <button class="help-btn" data-help="exec_compare">?</button></h3>
+            <canvas id="chart-exec-comparison"></canvas>
+          </div>
+          <div class="card chart-card">
+            <h3>Speedup vs. Number of Processors <button class="help-btn" data-help="speedup_curve">?</button></h3>
+            <canvas id="chart-speedup"></canvas>
+          </div>
+          <div class="card chart-card">
+            <h3>Parallel Efficiency vs. Processors <button class="help-btn" data-help="efficiency_curve">?</button></h3>
+            <canvas id="chart-efficiency"></canvas>
+          </div>
+          <div class="card chart-card">
+            <h3>CPU vs. GPU Comparison</h3>
+            <canvas id="chart-cpu-gpu"></canvas>
+          </div>
+          <div class="card chart-card">
+            <h3>Amdahl's Law <button class="help-btn" data-help="amdahl">?</button></h3>
+            <canvas id="chart-amdahl"></canvas>
+            <label class="inline-slider">
+              P = <span id="amdahl-p-display">0.90</span>
+              <input type="range" id="amdahl-p-slider" min="0" max="1" step="0.01" value="0.9">
+            </label>
+          </div>
+          <div class="card chart-card">
+            <h3>Communication Overhead vs. Devices <button class="help-btn" data-help="comm_curve">?</button></h3>
+            <canvas id="chart-comm"></canvas>
+          </div>
+        </div>
+
+        <h2 class="section-title">Comparison Mode</h2>
+        <div class="card">
+          <p class="muted">Save the current configuration as an experiment, then compare multiple runs side by side.</p>
+          <button id="save-experiment-btn" class="secondary-btn">+ Save Current Result to Comparison</button>
+          <div class="table-wrap">
+            <table id="comparison-table">
+              <thead>
+                <tr>
+                  <th>Configuration</th><th>CPU</th><th>GPUs</th><th>Strategy</th>
+                  <th>Time (s)</th><th>Speedup</th><th>Efficiency</th><th>Throughput</th><th></th>
+                </tr>
+              </thead>
+              <tbody id="comparison-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- PAGE: EXPERIMENTS ---------- -->
+    <section id="page-experiments" class="page">
+      <header class="page-header">
+        <h1>Experiment Mode</h1>
+      </header>
+
+      <div class="card">
+        <div class="preset-bar">
+          <span class="preset-label">Choose an experiment:</span>
+          <button class="chip exp-chip active" data-exp="cores">A. Increase CPU Cores</button>
+          <button class="chip exp-chip" data-exp="gpus">B. Increase GPUs</button>
+          <button class="chip exp-chip" data-exp="batch">C. Change Batch Size</button>
+          <button class="chip exp-chip" data-exp="fraction">D. Change Parallelizable Fraction</button>
+        </div>
+        <button id="run-experiment-btn" class="run-btn secondary">Run Experiment</button>
+        <p class="muted" id="experiment-desc"></p>
+      </div>
+
+      <div id="experiment-results" style="display:none;">
+        <div class="grid-2">
+          <div class="card chart-card">
+            <h3 id="exp-chart1-title">Execution Time</h3>
+            <canvas id="chart-exp-1"></canvas>
+          </div>
+          <div class="card chart-card">
+            <h3 id="exp-chart2-title">Speedup / Secondary Metric</h3>
+            <canvas id="chart-exp-2"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- PAGE: ABOUT ---------- -->
+    <section id="page-about" class="page">
+      <header class="page-header">
+        <h1>About This Project</h1>
+      </header>
+
+      <div class="grid-2">
+        <div class="card">
+          <h2>What is Deep Learning?</h2>
+          <p>Deep Learning is a subset of Machine Learning that uses multi-layer neural networks to learn patterns from data. Training these networks requires repeated passes over large datasets, which is computationally expensive.</p>
+        </div>
+        <div class="card">
+          <h2>What is HPC?</h2>
+          <p>High Performance Computing (HPC) uses powerful, often parallel, computing resources — multiple CPU cores, GPUs, and networked nodes — to solve computationally intensive problems efficiently.</p>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Why Combine Them?</h2>
+        <p>Large AI workloads require substantial computation and memory. HPC techniques such as multicore processing, GPU acceleration, data/model parallelism, and distributed computing allow these workloads to be processed more efficiently. This simulator lets you change hardware and workload parameters and observe, through a transparent mathematical model, how execution time, speedup, and efficiency respond.</p>
+      </div>
+
+      <div class="card">
+        <h2>Simulation Assumptions</h2>
+        <ul class="assumptions-list">
+          <li>Execution time is an <strong>estimate</strong> derived from a simplified mathematical model, not a measurement from real hardware.</li>
+          <li>CPU and GPU performance figures are abstract "reference" values, not benchmarks of specific real chips.</li>
+          <li>GPU behavior is modeled even when no physical GPU is present on the machine running this app.</li>
+          <li>Communication overhead is estimated from model size, bandwidth, and latency using a simplified all-reduce model, with one amortized synchronization event per epoch.</li>
+          <li>Memory behavior is simplified to a single working-set estimate (weights + gradients + optimizer state + one batch).</li>
+          <li>CPU/GPU/memory utilization figures are <strong>simulated</strong>, not readings from the user's actual machine.</li>
+          <li>This tool is intended for educational comparison of HPC concepts, not production capacity planning.</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Help modal -->
+<div id="help-modal" class="modal-overlay">
+  <div class="modal-box">
+    <button id="help-modal-close" class="modal-close">&times;</button>
+    <h3 id="help-modal-title"></h3>
+    <p id="help-modal-body"></p>
+  </div>
+</div>
+
+<script src="js/help-content.js"></script>
+<script src="js/architecture.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
